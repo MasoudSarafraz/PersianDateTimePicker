@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
@@ -9,8 +10,7 @@ public static class PersianDateConverter
 {
     private static readonly PersianCalendar pc = new PersianCalendar();
     private static readonly object lockObject = new object();
-    private static readonly ConcurrentDictionary<string, DateTime?> persianToGregorianCache =
-        new ConcurrentDictionary<string, DateTime?>();
+    private static readonly Dictionary<string, DateTime?> persianToGregorianCache = new Dictionary<string, DateTime?>();
 
     public static readonly string[] PersianMonths = {
         "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -64,13 +64,13 @@ public static class PersianDateConverter
             lock (lockObject)
             {
                 DateTime result = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
-                persianToGregorianCache.TryAdd(persianDate, result);
+                persianToGregorianCache.Add(persianDate, result);
                 return result;
             }
         }
         catch (ArgumentOutOfRangeException)
         {
-            persianToGregorianCache.TryAdd(persianDate, null);
+            persianToGregorianCache.Add(persianDate, null);
             return null;
         }
     }
@@ -362,7 +362,7 @@ public class CalendarPanel : Panel
 
         int day = GetDayFromPoint(e.Location);
         if (day > 0 && day <= _monthInfo.DaysInMonth)
-       {
+        {
             // فقط انتخاب روز بدون بستن پنجره
             _selectedDay = day;
             Invalidate();
@@ -625,7 +625,7 @@ public partial class PersianDateTimePicker : UserControl
     private CalendarForm calendarForm;
     private PersianCalendar pc = new PersianCalendar();
     // کش کردن تاریخ‌های رایج برای افزایش سرعت
-    private static readonly ConcurrentDictionary<DateTime, string> persianDateCache = new ConcurrentDictionary<DateTime, string>();
+    private static readonly Dictionary<DateTime, string> persianDateCache = new Dictionary<DateTime, string>();
 
     [Browsable(true)]
     [Category("Behavior")]
@@ -731,7 +731,7 @@ public partial class PersianDateTimePicker : UserControl
             {
                 string persianDate = PersianDateConverter.ToPersianDateString(_value);
                 txtDate.Text = persianDate;
-                persianDateCache.TryAdd(_value, persianDate);
+                persianDateCache.Add(_value, persianDate);
             }
         }
     }
